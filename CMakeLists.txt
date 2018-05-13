@@ -15,3 +15,11 @@ add_subdirectory("3rdparty")
 
 add_executable(2048 ${SOURCES} ${EXTERNAL_SOURCES})
 target_link_libraries(2048 dl)
+
+find_package(SFML 2 REQUIRED graphics window system)
+if(SFML_FOUND)
+    include_directories(${SFML_INCLUDE_DIR})
+    message(STATUS ${SFML_INCLUDE_DIR})
+    target_link_libraries(2048 ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
+endif()
+
