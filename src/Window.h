@@ -6,6 +6,9 @@
 #include <GL/gl3w.h>
 #include <SFML/Graphics.hpp>
 
+#include "Board.h"
+#include "BoardRender.h"
+#include "IGameController.h"
 #include "result/result.h"
 
 enum class InitErrorKind {
@@ -44,6 +47,10 @@ private:
 
     GLuint m_font_tex = 0;
     GLuint m_imgui_shader = 0;
+
+    BoardRenderer m_renderer;
+    Board m_board;
+    std::unique_ptr<IGameController> m_controller;
 };
 
 #endif

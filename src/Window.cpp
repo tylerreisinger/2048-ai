@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+#include "HumanGameController.h"
+
 using namespace result;
 
 std::string get_shader_log(GLuint shader) {
@@ -72,7 +74,7 @@ ImVec2 to_imvec2(sf::Vector2<T> in) {
     return ImVec2(static_cast<float>(in.x), static_cast<float>(in.y));
 }
 
-Window::Window() {}
+Window::Window() : m_board(5, 5) {}
 
 Window::~Window() {
     glDeleteTextures(1, &m_font_tex);
@@ -88,14 +90,17 @@ void Window::initialize() {
     ctx_settings.sRgbCapable = true;
     ctx_settings.attributeFlags =
             sf::ContextSettings::Core | sf::ContextSettings::Debug;
-    m_window.create(sf::VideoMode(800, 600),
+    m_window.create(sf::VideoMode(1600, 1200),
             "Starlight Glimmer",
             sf::Style::Default,
             ctx_settings);
-    m_window.setFramerateLimit(30);
+    m_window.setFramerateLimit(60);
 
     init_gl().expect("Unable to initialize OpenGL!");
     init_imgui();
+
+    m_board.add_new_block();
+    m_controller = std::make_unique<HumanGameController>();
 }
 
 void Window::run() {
@@ -114,7 +119,10 @@ void Window::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw_imgui(ImGui::GetDrawData());
 }
-void Window::update() { update_imgui(); }
+void Window::update() {
+    m_controller->do_turn(m_board);
+    update_imgui();
+}
 
 Result<unit_t, InitErrorKind> Window::init_gl() {
     if(gl3wInit()) {
@@ -182,6 +190,7 @@ void Window::event_loop() {
             break;
         }
     }
+    m_controller->handle_event(m_board, e);
 }
 
 void Window::init_imgui() {
@@ -222,6 +231,12 @@ void Window::update_imgui() {
     ImGui::NewFrame();
 
     ImGui::ShowMetricsWindow();
+
+    ImGui::Begin("Window");
+    auto draw_list = ImGui::GetWindowDrawList();
+    m_renderer.draw(m_board, draw_list);
+    ImGui::End();
+
 
     ImGui::Render();
 }
