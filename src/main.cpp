@@ -34,6 +34,11 @@ int main(int argc, char** argv) {
     std::cout << "Selecting " << controller_name << "..." << std::endl;
     auto controller =
             create_controller(controller_name, args["delay"].as<int>());
+    if(!controller) {
+        std::cerr << "Unknown controller '" << controller_name << "'."
+                  << std::endl;
+        return -1;
+    }
 
     Window w;
     w.run(std::move(controller));
