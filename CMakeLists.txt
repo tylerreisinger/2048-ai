@@ -10,6 +10,7 @@ endif()
 include_directories("src")
 include_directories("3rdparty")
 include_directories("3rdparty/result")
+include_directories("3rdparty/cxxopts/include")
 add_subdirectory("src")
 add_subdirectory("3rdparty")
 

@@ -84,7 +84,7 @@ Window::~Window() {
 }
 
 
-void Window::initialize() {
+void Window::initialize(std::unique_ptr<IGameController> controller) {
     auto ctx_settings = sf::ContextSettings();
     ctx_settings.majorVersion = 4;
     ctx_settings.minorVersion = 5;
@@ -98,16 +98,15 @@ void Window::initialize() {
             ctx_settings);
     m_window.setFramerateLimit(60);
 
+    m_controller = std::move(controller);
     init_gl().expect("Unable to initialize OpenGL!");
     init_imgui();
 
     m_board.add_new_block();
-    // m_controller = std::make_unique<HumanGameController>();
-    m_controller = std::make_unique<RandomController>(10);
 }
 
-void Window::run() {
-    initialize();
+void Window::run(std::unique_ptr<IGameController> controller) {
+    initialize(std::move(controller));
 
     while(m_window.isOpen()) {
         event_loop();

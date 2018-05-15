@@ -28,12 +28,12 @@ public:
     Window& operator=(const Window& other) = delete;
     Window& operator=(Window&& other) = default;
 
-    void run();
+    void run(std::unique_ptr<IGameController> controller);
 
 private:
     void update();
     void draw();
-    void initialize();
+    void initialize(std::unique_ptr<IGameController> controller);
     void event_loop();
 
     void init_imgui();

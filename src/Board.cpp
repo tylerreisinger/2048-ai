@@ -16,7 +16,6 @@ void Board::shift_board(ShiftDirection dir) {
     bool changed = false;
     int idx = 1;
     do {
-        std::cout << "===== ITER " << idx << " =====" << std::endl;
         changed = false;
         for(int y = 0; y < m_height; ++y) {
             for(int x = 0; x < m_width; ++x) {
@@ -29,10 +28,7 @@ void Board::shift_board(ShiftDirection dir) {
                 auto& shift_cell = get_cell(shift_pos.x, shift_pos.y);
                 auto& cur_cell = get_cell(pos.x, pos.y);
                 if(cur_cell.value != Cell::EMPTY) {
-                    std::cout << "Merge: " << pos << "#" << cur_cell.value
-                              << "->" << shift_pos << "#" << shift_cell.value;
                     changed = changed || merge(shift_cell, cur_cell);
-                    std::cout << "; change=" << changed << std::endl;
                 }
             }
         }
