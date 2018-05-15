@@ -27,6 +27,10 @@ int main(int argc, char** argv) {
 
     if(args.count("help") > 0) {
         std::cout << options.help() << std::endl;
+        std::cout << "Available Controllers:\n"
+                  << "\tHumanController\n"
+                  << "\tRandomController\n"
+                  << "\tMctsController\n";
         return 0;
     }
 
