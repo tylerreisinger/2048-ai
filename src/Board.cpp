@@ -1,6 +1,7 @@
 #include "Board.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 std::ostream& operator<<(std::ostream& stream, sf::Vector2<int> v) {
@@ -91,3 +92,47 @@ bool Board::is_filled() const {
     });
 }
 bool Board::is_lost() const { return m_is_lost; }
+
+double Board::compute_score() const {
+    double val = 0.0;
+    for(const auto& cell : m_cells) {
+        val += score_for_cell(cell.value);
+    }
+    return val;
+}
+
+double Board::score_for_cell(const Cell& cell) const {
+    if(cell.value == 2.0) {
+        return 0.0;
+    }
+    auto x = cell.value - 1;
+    return 2.0 * (x + score_for_cell(x));
+}
+
+double Board::total_value() const {
+    double val = 0.0;
+    for(const auto& cell : m_cells) {
+        val += cell.value;
+    }
+    return val;
+}
+
+double Board::max_value() const {
+    double val = 0.0;
+    for(const auto& cell : m_cells) {
+        val = std::max(val, static_cast<double>(cell.value));
+    }
+    return val;
+}
+
+int Board::free_spaces() const {
+    int val = 0;
+    for(const auto& cell : m_cells) {
+        if(cell.value == Cell::EMPTY) {
+            val += 1;
+        }
+    }
+    return val;
+}
+
+int Board::filled_spaces() const { return total_blocks() - free_spaces(); }

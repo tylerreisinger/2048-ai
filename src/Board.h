@@ -41,11 +41,19 @@ public:
 
     void shift_board(ShiftDirection dir);
 
+    double compute_score() const;
+    double total_value() const;
+    double max_value() const;
+
+    int free_spaces() const;
+    int filled_spaces() const;
+
     const Cell& get_cell(int x, int y) const;
     Cell& get_cell(int x, int y);
 
     int width() const { return m_width; }
     int height() const { return m_height; }
+    int total_blocks() const { return width() * height(); }
     const std::vector<Cell>& cells() const { return m_cells; }
     void add_new_block();
 
@@ -55,6 +63,7 @@ public:
 private:
     static sf::Vector2<int> dir_offset(ShiftDirection dir);
     bool merge(Cell& cell1, Cell& cell2);
+    double score_for_cell(const Cell& cell) const;
 
 
     int m_width;
