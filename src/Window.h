@@ -6,7 +6,6 @@
 #include <GL/gl3w.h>
 #include <SFML/Graphics.hpp>
 
-#include "Board.h"
 #include "BoardRender.h"
 #include "IGameController.h"
 #include "result/result.h"

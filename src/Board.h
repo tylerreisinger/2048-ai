@@ -50,6 +50,7 @@ public:
     void add_new_block();
 
     bool is_filled() const;
+    bool is_lost() const;
 
 private:
     static sf::Vector2<int> dir_offset(ShiftDirection dir);
@@ -60,6 +61,7 @@ private:
     int m_height;
     std::vector<Cell> m_cells;
     std::mt19937 m_rng;
+    bool m_is_lost = false;
 };
 
 #endif

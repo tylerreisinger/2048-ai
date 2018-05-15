@@ -7,6 +7,9 @@
 void HumanGameController::do_turn(Board& board) {}
 
 void HumanGameController::handle_event(Board& board, const sf::Event& e) {
+    if(board.is_lost()) {
+        return;
+    }
     switch(e.type) {
     case sf::Event::KeyPressed: {
         switch(e.key.code) {

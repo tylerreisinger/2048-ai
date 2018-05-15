@@ -22,6 +22,11 @@ void BoardRenderer::draw(const Board& board, ImDrawList* draw_list) {
     auto inner_padding = ImVec2(2.0, 2.0);
     auto cell_size = ImVec2(64.0, 64.0);
 
+    auto cell_color = 0xFF886644;
+    if(board.is_lost()) {
+        cell_color = 0xFF2222AA;
+    }
+
     for(int y = 0; y < board.height(); ++y) {
         for(int x = 0; x < board.width(); ++x) {
             const auto& cell = board.get_cell(x, y);
@@ -34,7 +39,7 @@ void BoardRenderer::draw(const Board& board, ImDrawList* draw_list) {
                         cell_pos, cell_pos + cell_size, 0xAAAAAAAA, 0.0);
             } else {
                 draw_list->AddRectFilled(
-                        cell_pos, cell_pos + cell_size, 0xFF886644, 3.0);
+                        cell_pos, cell_pos + cell_size, cell_color, 3.0);
                 auto text = std::to_string(cell.value);
                 draw_list->AddText(cell_pos + ImVec2(26.0, 26.0),
                         0xFFFFFFFF,

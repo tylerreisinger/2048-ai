@@ -6,6 +6,8 @@
 
 #include "HumanGameController.h"
 
+#include "AI/RandomController.h"
+
 using namespace result;
 
 std::string get_shader_log(GLuint shader) {
@@ -100,7 +102,8 @@ void Window::initialize() {
     init_imgui();
 
     m_board.add_new_block();
-    m_controller = std::make_unique<HumanGameController>();
+    // m_controller = std::make_unique<HumanGameController>();
+    m_controller = std::make_unique<RandomController>(10);
 }
 
 void Window::run() {

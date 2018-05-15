@@ -75,6 +75,10 @@ bool Board::merge(Cell& cell1, Cell& cell2) {
 void Board::add_new_block() {
     std::uniform_int_distribution<int> dist(0, m_width * m_height);
     sf::Vector2<int> pos;
+    if(m_is_lost || is_filled()) {
+        m_is_lost = true;
+        return;
+    }
     while(true) {
         auto pos = dist(m_rng);
         auto& cell = m_cells[pos];
@@ -90,3 +94,4 @@ bool Board::is_filled() const {
         return cell.value != Cell::EMPTY;
     });
 }
+bool Board::is_lost() const { return m_is_lost; }
