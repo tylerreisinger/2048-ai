@@ -169,6 +169,7 @@ std::ostream& operator<<(std::ostream& stream, ShiftDirection dir) {
 }
 
 void Board::shift_board(ShiftDirection dir) {
+    m_turn += 1;
     switch(dir) {
     case ShiftDirection::Left:
         return shift_board_left();

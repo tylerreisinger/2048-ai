@@ -2,6 +2,7 @@
 
 #include "imgui/imgui.h"
 
+#include <chrono>
 #include <cstring>
 
 #include "HumanGameController.h"
@@ -55,8 +56,30 @@ in VertexData {
 
 out vec4 color;
 
+ float apply_srgb_component(float component) {
+    const float srgb_coeff = 12.92;
+    const float exponent = 2.4;
+    const float cutoff = 0.04045;
+    const float a = 0.055;
+
+    if(component < cutoff) {
+        return component/srgb_coeff;
+    } else {
+        return pow((component + a)/(1.0 + a), exponent);
+    }
+}
+
+vec4 apply_srgb(vec4 color) {
+    return vec4(
+        apply_srgb_component(color.r), 
+        apply_srgb_component(color.g), 
+        apply_srgb_component(color.b), 
+        color.a
+    );
+}
+
 void main() {
-    color = vertex_data.color * texture(tex, vertex_data.uv);
+    color = apply_srgb(vertex_data.color * texture(tex, vertex_data.uv));
 }
 )";
 
@@ -97,6 +120,7 @@ void Window::initialize(std::unique_ptr<IGameController> controller) {
             sf::Style::Default,
             ctx_settings);
     m_window.setFramerateLimit(60);
+    m_window.setKeyRepeatEnabled(false);
 
     m_controller = std::move(controller);
     init_gl().expect("Unable to initialize OpenGL!");
@@ -118,11 +142,19 @@ void Window::run(std::unique_ptr<IGameController> controller) {
 }
 
 void Window::draw() {
+    auto start = std::chrono::high_resolution_clock::now();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw_imgui(ImGui::GetDrawData());
+    auto end = std::chrono::high_resolution_clock::now();
+    m_draw_time = std::chrono::duration_cast<
+            std::chrono::duration<double, std::milli>>(end - start);
 }
 void Window::update() {
+    auto start = std::chrono::high_resolution_clock::now();
     m_controller->do_turn(m_board);
+    auto end = std::chrono::high_resolution_clock::now();
+    m_ai_time = std::chrono::duration_cast<
+            std::chrono::duration<double, std::milli>>(end - start);
     update_imgui();
 }
 
@@ -191,8 +223,8 @@ void Window::event_loop() {
         default:
             break;
         }
+        m_controller->handle_event(m_board, e);
     }
-    m_controller->handle_event(m_board, e);
 }
 
 void Window::init_imgui() {
@@ -239,6 +271,14 @@ void Window::update_imgui() {
     m_renderer.draw(m_board, draw_list);
     ImGui::End();
 
+    ImGui::Begin("Board Statistics");
+    ImGui::LabelText("##Header", "Current State:");
+    ImGui::BulletText("Score: %d", static_cast<int>(m_board.compute_score()));
+    ImGui::BulletText("Free Cells: %d", m_board.free_spaces());
+    ImGui::BulletText("Turn #: %d", m_board.turn());
+    ImGui::BulletText("Last Move Time: %fms", m_ai_time.count());
+    ImGui::BulletText("Last Draw Time: %fms", m_draw_time.count());
+    ImGui::End();
 
     ImGui::Render();
 }

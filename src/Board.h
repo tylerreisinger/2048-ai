@@ -50,6 +50,7 @@ public:
 
     int free_spaces() const;
     int filled_spaces() const;
+    int turn() const { return m_turn; }
 
     const Cell& get_cell(int x, int y) const;
     Cell& get_cell(int x, int y);
@@ -78,6 +79,7 @@ private:
 
     int m_width;
     int m_height;
+    int m_turn = 0;
     std::vector<Cell> m_cells;
     std::minstd_rand m_rng;
     bool m_is_lost = false;

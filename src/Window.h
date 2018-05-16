@@ -1,6 +1,7 @@
 #ifndef WINDOW_H_
 #define WINDOW_H_
 
+#include <chrono>
 #include <memory>
 
 #include <GL/gl3w.h>
@@ -46,6 +47,9 @@ private:
 
     GLuint m_font_tex = 0;
     GLuint m_imgui_shader = 0;
+
+    std::chrono::duration<double, std::milli> m_ai_time;
+    std::chrono::duration<double, std::milli> m_draw_time;
 
     BoardRenderer m_renderer;
     Board m_board;

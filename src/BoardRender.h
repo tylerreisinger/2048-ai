@@ -17,6 +17,8 @@ public:
 
     void draw(const Board& board, ImDrawList* draw_list);
 
+    uint32_t color_for_cell(const Cell& cell) const;
+
 private:
 };
 
