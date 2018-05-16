@@ -12,7 +12,8 @@ std::ostream& operator<<(std::ostream& stream, sf::Vector2<int> v) {
 Board::Board(int width, int height) : m_width(width), m_height(height) {
     m_cells.resize(width * height);
 }
-void Board::shift_board(ShiftDirection dir) {
+// Mpstly works, but is over 1 OOM slower than the new methods.
+void Board::shift_board_legacy(ShiftDirection dir) {
     auto shift = dir_offset(dir);
     bool changed = false;
     int idx = 1;
@@ -70,18 +71,25 @@ bool Board::merge(Cell& cell1, Cell& cell2) {
 }
 
 void Board::add_new_block() {
-    std::uniform_int_distribution<int> dist(0, m_width * m_height);
     sf::Vector2<int> pos;
-    if(m_is_lost || is_filled()) {
+    if(m_is_lost) {
+        return;
+    }
+    int free = free_spaces();
+    if(free == 0) {
         m_is_lost = true;
         return;
     }
-    while(true) {
-        auto pos = dist(m_rng);
-        auto& cell = m_cells[pos];
-        if(cell.value == Cell::EMPTY) {
-            cell = 2;
-            break;
+
+    int selector = m_rng() % (free - 1);
+    int free_cnt = 0;
+    for(std::size_t i = 0; i < m_cells.size(); ++i) {
+        if(m_cells[i].value == Cell::EMPTY) {
+            if(free_cnt == selector) {
+                m_cells[i].value = 2;
+                return;
+            }
+            free_cnt += 1;
         }
     }
 }
@@ -158,4 +166,201 @@ std::ostream& operator<<(std::ostream& stream, ShiftDirection dir) {
         break;
     }
     return stream;
+}
+
+void Board::shift_board(ShiftDirection dir) {
+    switch(dir) {
+    case ShiftDirection::Left:
+        return shift_board_left();
+    case ShiftDirection::Right:
+        return shift_board_right();
+    case ShiftDirection::Up:
+        return shift_board_up();
+    case ShiftDirection::Down:
+        return shift_board_down();
+    }
+}
+
+// These functions are written to be fast, as opposed to clean.
+// Using separate functions instead of ifs and generic logic improves
+// execution time significantly, and for many search AIs, these
+// are the most time consuming functions in the program.
+
+void Board::shift_board_left() {
+    // Iterate the board until finding an empty space
+    for(int y = 0; y < m_height; ++y) {
+        auto y_idx = y * m_width;
+        for(int x = 0; x < m_width; ++x) {
+            auto* cell = &m_cells[x + y_idx];
+            if(cell->value == Cell::EMPTY) {
+                // We found an empty space, now look forward for a non-empty
+                // space.
+                for(int x2 = x + 1; x2 < m_width; ++x2) {
+                    auto& cell2 = m_cells[x2 + y_idx];
+                    if(cell2.value != Cell::EMPTY) {
+                        // We found a non-empty space.
+                        // Swap the empty space and non-empty space.
+                        std::swap(*cell, cell2);
+                        // If we are not at the edge, try to merge
+                        if(x != 0) {
+                            Cell* back_cell = &m_cells[x - 1 + y_idx];
+                            if(try_merge(*back_cell, *cell)) {
+                                // We merged, so there is a new open space.
+                                x -= 1;
+                            }
+                        }
+                        // Update to look at the next cell.
+                        x += 1;
+                        cell = &m_cells[x + y_idx];
+                    }
+                }
+                break;
+            } else {
+                // Try to merge blocks next to each other that didn't move.
+                if(x != 0) {
+                    auto& back_cell = m_cells[x - 1 + y_idx];
+                    auto& front_cell = m_cells[x + y_idx];
+                    if(try_merge(back_cell, front_cell)) {
+                        x -= 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Board::shift_board_right() {
+    // Iterate the board until finding an empty space
+    for(int y = 0; y < m_height; ++y) {
+        auto y_idx = y * m_width;
+        for(int x = m_width - 1; x >= 0; --x) {
+            auto* cell = &m_cells[x + y_idx];
+            if(cell->value == Cell::EMPTY) {
+                // We found an empty space, now look forward for a non-empty
+                // space.
+                for(int x2 = x - 1; x2 >= 0; --x2) {
+                    auto& cell2 = m_cells[x2 + y_idx];
+                    if(cell2.value != Cell::EMPTY) {
+                        // We found a non-empty space.
+                        // Swap the empty space and non-empty space.
+                        std::swap(*cell, cell2);
+                        // If we are not at the edge, try to merge
+                        if(x != m_width - 1) {
+                            Cell* back_cell = &m_cells[x + 1 + y_idx];
+                            if(try_merge(*back_cell, *cell)) {
+                                // We merged, so there is a new open space.
+                                x += 1;
+                            }
+                        }
+                        // Update to look at the next cell.
+                        x -= 1;
+                        cell = &m_cells[x + y_idx];
+                    }
+                }
+                break;
+            } else {
+                // Try to merge blocks next to each other that didn't move.
+                if(x != m_width - 1) {
+                    auto& back_cell = m_cells[x + 1 + y_idx];
+                    auto& front_cell = m_cells[x + y_idx];
+                    if(try_merge(back_cell, front_cell)) {
+                        x += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Board::shift_board_up() {
+    // Iterate the board until finding an empty space
+    for(int x = 0; x < m_width; ++x) {
+        for(int y = 0; y < m_height; ++y) {
+            auto* cell = &m_cells[x + y * m_width];
+            if(cell->value == Cell::EMPTY) {
+                // We found an empty space, now look forward for a non-empty
+                // space.
+                for(int y2 = y + 1; y2 < m_height; ++y2) {
+                    auto& cell2 = m_cells[x + y2 * m_width];
+                    if(cell2.value != Cell::EMPTY) {
+                        // We found a non-empty space.
+                        // Swap the empty space and non-empty space.
+                        std::swap(*cell, cell2);
+                        // If we are not at the edge, try to merge
+                        if(y != 0) {
+                            Cell* back_cell = &m_cells[x + (y - 1) * m_width];
+                            if(try_merge(*back_cell, *cell)) {
+                                // We merged, so there is a new open space.
+                                y -= 1;
+                            }
+                        }
+                        // Update to look at the next cell.
+                        y += 1;
+                        cell = &m_cells[x + y * m_width];
+                    }
+                }
+                break;
+            } else {
+                // Try to merge blocks next to each other that didn't move.
+                if(y != 0) {
+                    auto& back_cell = m_cells[x + (y - 1) * m_width];
+                    auto& front_cell = m_cells[x + y * m_width];
+                    if(try_merge(back_cell, front_cell)) {
+                        y -= 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Board::shift_board_down() {
+    // Iterate the board until finding an empty space
+    for(int x = 0; x < m_width; ++x) {
+        for(int y = m_height - 1; y >= 0; --y) {
+            auto* cell = &m_cells[x + y * m_width];
+            if(cell->value == Cell::EMPTY) {
+                // We found an empty space, now look forward for a non-empty
+                // space.
+                for(int y2 = y - 1; y2 >= 0; --y2) {
+                    auto& cell2 = m_cells[x + y2 * m_width];
+                    if(cell2.value != Cell::EMPTY) {
+                        // We found a non-empty space.
+                        // Swap the empty space and non-empty space.
+                        std::swap(*cell, cell2);
+                        // If we are not at the edge, try to merge
+                        if(y != m_height - 1) {
+                            Cell* back_cell = &m_cells[x + (y + 1) * m_width];
+                            if(try_merge(*back_cell, *cell)) {
+                                // We merged, so there is a new open space.
+                                y += 1;
+                            }
+                        }
+                        // Update to look at the next cell.
+                        y -= 1;
+                        cell = &m_cells[x + y * m_width];
+                    }
+                }
+                break;
+            } else {
+                // Try to merge blocks next to each other that didn't move.
+                if(y != m_height - 1) {
+                    auto& back_cell = m_cells[x + (y + 1) * m_width];
+                    auto& front_cell = m_cells[x + y * m_width];
+                    if(try_merge(back_cell, front_cell)) {
+                        y += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool Board::try_merge(Cell& lhs, Cell& rhs) {
+    if(lhs.value == rhs.value) {
+        lhs.value *= 2;
+        rhs.value = Cell::EMPTY;
+        return true;
+    }
+    return false;
 }

@@ -22,7 +22,7 @@ void MctsController::do_turn(Board& board) {
 
     for(int i = 0; i < 4; ++i) {
         ShiftDirection dir = static_cast<ShiftDirection>(i);
-        auto out = do_trials(board, dir, 10, 5000);
+        auto out = do_trials(board, dir, 20, 15000);
         if(out.avg_score > max_avg_score) {
             max_avg_score = out.avg_score;
             avg_dir = dir;
@@ -49,7 +49,7 @@ void MctsController::do_turn(Board& board) {
     // if(max_fails > 22 && min_fails < max_fails) {
     //    board.do_move(loss_dir);
     //} else {
-    board.do_move(max_dir);
+    board.do_move(avg_dir);
     //}
 }
 

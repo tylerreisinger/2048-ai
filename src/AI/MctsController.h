@@ -34,7 +34,7 @@ private:
     double score_function(const Board& board, ShiftDirection dir) const;
 
 
-    std::mt19937 m_rng;
+    std::minstd_rand m_rng;
     std::uniform_int_distribution<int> m_move_dist =
             std::uniform_int_distribution<int>(0, 3);
     int m_time = 0;

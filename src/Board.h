@@ -41,6 +41,7 @@ public:
     Board& operator=(Board&& other) noexcept = default;
 
     void shift_board(ShiftDirection dir);
+    void shift_board_legacy(ShiftDirection dir);
     void do_move(ShiftDirection dir);
 
     double compute_score() const;
@@ -67,11 +68,18 @@ private:
     bool merge(Cell& cell1, Cell& cell2);
     double score_for_cell(const Cell& cell) const;
 
+    bool try_merge(Cell& lhs, Cell& rhs);
+
+    void shift_board_left();
+    void shift_board_right();
+    void shift_board_up();
+    void shift_board_down();
+
 
     int m_width;
     int m_height;
     std::vector<Cell> m_cells;
-    std::mt19937 m_rng;
+    std::minstd_rand m_rng;
     bool m_is_lost = false;
 };
 
