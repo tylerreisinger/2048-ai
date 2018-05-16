@@ -22,7 +22,7 @@ void MctsController::do_turn(Board& board) {
 
     for(int i = 0; i < 4; ++i) {
         ShiftDirection dir = static_cast<ShiftDirection>(i);
-        auto out = do_trials(board, dir, 20, 15000);
+        auto out = do_trials(board, dir, 10, 5000);
         if(out.avg_score > max_avg_score) {
             max_avg_score = out.avg_score;
             avg_dir = dir;
@@ -42,15 +42,12 @@ void MctsController::do_turn(Board& board) {
 
     std::cout << "Max Score: " << max_score << "(" << board.compute_score()
               << ") in dir " << max_dir << std::endl;
-    std::cout << "\tAvg Score: " << max_avg_score << std::endl;
+    std::cout << "\tAvg Score: " << max_avg_score << " in dir " << avg_dir
+              << std::endl;
     std::cout << "\tMax Fails: " << max_fails << " Min Fails: " << min_fails
               << std::endl;
 
-    // if(max_fails > 22 && min_fails < max_fails) {
-    //    board.do_move(loss_dir);
-    //} else {
-    board.do_move(avg_dir);
-    //}
+    board.do_move(max_dir);
 }
 
 bool MctsController::do_trial(Board& board, ShiftDirection dir) {
@@ -82,17 +79,6 @@ MctsOutput MctsController::do_trials(
     for(int i = 0; i < count; ++i) {
         auto [val, lose] = do_trial_to_depth(board, start_dir, depth);
         losses += lose ? 1 : 0;
-        /*
-        if(start_dir == ShiftDirection::Left) {
-            val *= 2.0;
-        }
-        else if(start_dir == ShiftDirection::Down) {
-            val *= 2.0;
-        }
-        else if(start_dir == ShiftDirection::Right) {
-            val *= 1.25;
-        }
-        */
         max_value = std::max(max_value, val);
         out_value += val;
         start_dir = static_cast<ShiftDirection>(m_move_dist(m_rng));
