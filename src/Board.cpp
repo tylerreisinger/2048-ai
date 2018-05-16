@@ -81,7 +81,7 @@ void Board::add_new_block() {
         return;
     }
 
-    int selector = m_rng() % (free - 1);
+    int selector = m_rng() % free;
     int free_cnt = 0;
     for(std::size_t i = 0; i < m_cells.size(); ++i) {
         if(m_cells[i].value == Cell::EMPTY) {

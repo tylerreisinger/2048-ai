@@ -15,7 +15,8 @@ include_directories("3rdparty/cxxopts/include")
 add_subdirectory("src")
 add_subdirectory("3rdparty")
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g3 -O3 -DNDEBUG")
 
 add_executable(2048 ${SOURCES} ${EXTERNAL_SOURCES})
 target_link_libraries(2048 dl)
