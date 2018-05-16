@@ -6,6 +6,7 @@
 
 #include "cxxopts.hpp"
 
+#include "AI/MctsController.h"
 #include "AI/RandomController.h"
 #include "HumanGameController.h"
 #include "IGameController.h"
@@ -65,6 +66,8 @@ std::unique_ptr<IGameController> create_controller(
         return std::make_unique<HumanGameController>();
     } else if(name == "RandomController") {
         return std::make_unique<RandomController>(delay);
+    } else if(name == "MctsController") {
+        return std::make_unique<MctsController>(delay);
     } else {
         return nullptr;
     }

@@ -18,7 +18,7 @@ void RandomController::do_turn(Board& board) {
     auto shift = ShiftDirection::Left;
     switch(choice) {
     case 0:
-        shift = ShiftDirection::Up;
+        shift = ShiftDirection::Left;
         break;
     case 1:
         shift = ShiftDirection::Left;
@@ -27,7 +27,7 @@ void RandomController::do_turn(Board& board) {
         shift = ShiftDirection::Down;
         break;
     case 3:
-        shift = ShiftDirection::Right;
+        shift = ShiftDirection::Down;
         break;
     default:
         std::terminate();

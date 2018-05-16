@@ -102,10 +102,10 @@ double Board::compute_score() const {
 }
 
 double Board::score_for_cell(const Cell& cell) const {
-    if(cell.value == 2.0) {
+    if(cell.value <= 2.0) {
         return 0.0;
     }
-    auto x = cell.value - 1;
+    auto x = cell.value >> 1;
     return 2.0 * (x + score_for_cell(x));
 }
 
@@ -136,3 +136,26 @@ int Board::free_spaces() const {
 }
 
 int Board::filled_spaces() const { return total_blocks() - free_spaces(); }
+
+void Board::do_move(ShiftDirection dir) {
+    shift_board(dir);
+    add_new_block();
+}
+
+std::ostream& operator<<(std::ostream& stream, ShiftDirection dir) {
+    switch(dir) {
+    case ShiftDirection::Down:
+        stream << "Down";
+        break;
+    case ShiftDirection::Left:
+        stream << "Left";
+        break;
+    case ShiftDirection::Right:
+        stream << "Right";
+        break;
+    case ShiftDirection::Up:
+        stream << "Up";
+        break;
+    }
+    return stream;
+}

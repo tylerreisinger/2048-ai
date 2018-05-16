@@ -2,16 +2,17 @@
 #define BOARD_H_
 
 #include <cstdint>
+#include <ostream>
 #include <random>
 #include <vector>
 
 #include <SFML/System/Vector2.hpp>
 
 enum class ShiftDirection {
-    Up,
-    Left,
-    Down,
-    Right,
+    Down = 0,
+    Left = 1,
+    Right = 2,
+    Up = 3,
 };
 
 class Cell {
@@ -40,6 +41,7 @@ public:
     Board& operator=(Board&& other) noexcept = default;
 
     void shift_board(ShiftDirection dir);
+    void do_move(ShiftDirection dir);
 
     double compute_score() const;
     double total_value() const;
@@ -72,5 +74,7 @@ private:
     std::mt19937 m_rng;
     bool m_is_lost = false;
 };
+
+std::ostream& operator<<(std::ostream& stream, ShiftDirection dir);
 
 #endif
