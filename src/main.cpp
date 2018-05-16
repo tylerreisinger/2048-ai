@@ -8,6 +8,7 @@
 
 #include "AI/MctsController.h"
 #include "AI/RandomController.h"
+#include "AI/TestController.h"
 #include "HumanGameController.h"
 #include "IGameController.h"
 
@@ -31,7 +32,8 @@ int main(int argc, char** argv) {
         std::cout << "Available Controllers:\n"
                   << "\tHumanController\n"
                   << "\tRandomController\n"
-                  << "\tMctsController\n";
+                  << "\tMctsController\n"
+                  << "\tTestController\n";
         return 0;
     }
 
@@ -68,6 +70,8 @@ std::unique_ptr<IGameController> create_controller(
         return std::make_unique<RandomController>(delay);
     } else if(name == "MctsController") {
         return std::make_unique<MctsController>(delay);
+    } else if(name == "TestController") {
+        return std::make_unique<TestController>(delay);
     } else {
         return nullptr;
     }

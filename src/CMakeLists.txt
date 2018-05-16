@@ -7,4 +7,5 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/AI/MctsController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AI/RandomController.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/AI/TestController.cpp
 PARENT_SCOPE)
