@@ -30,5 +30,6 @@ void HumanGameController::handle_event(Board& board, const sf::Event& e) {
         }
         break;
     }
+    default: break;
     }
 }
