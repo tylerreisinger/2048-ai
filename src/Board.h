@@ -89,6 +89,35 @@ private:
     bool m_is_lost = false;
 };
 
+inline uint64_t fast_pow2_log2(uint64_t v) {
+    /*
+    switch(v) {
+        case 2: return 1;
+        case 4: return 2;
+        case 8: return 3;
+        case 16: return 4;
+        case 32: return 5;
+        case 64: return 6;
+        case 128: return 7;
+        case 256: return 8;
+        case 512: return 9;
+        case 1024: return 10;
+        case 2048: return 11;
+        case 4096: return 12;
+        case 8192: return 13;
+        case 8192: return 13;
+    }
+    */
+    return 64 - __builtin_clzl(v) - 1;
+}
+
+inline double Board::score_for_cell(const Cell& cell) const {
+    auto x = cell.value >> 1;
+    auto n = fast_pow2_log2(x);
+    return 2.0 * x * n;
+}
+
+
 std::ostream& operator<<(std::ostream& stream, ShiftDirection dir);
 
 #endif

@@ -39,18 +39,20 @@ public:
     virtual void do_turn(Board& board, const GameTime& time) override;
     virtual void seed(std::seed_seq& seed) override { m_rng.seed(seed); }
 
+    virtual void draw_state(const Board& board, const GameTime& time) override;
 
 private:
     std::tuple<MaybeMove, double> minimax(Board& board,
             int depth,
-            bool is_maximizing,
             MinimaxStats& node_count);
     std::tuple<MaybeMove, double> minimax_max(
             Board& board, int depth, MinimaxStats& node_count);
     double minimax_min(Board& board, int depth, MinimaxStats& node_count);
     double score_board(const Board& board);
+    double score_move(ShiftDirection dir);
 
     std::default_random_engine m_rng;
+    MinimaxStats m_stats;
 };
 
 #endif

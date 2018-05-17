@@ -2,29 +2,60 @@
 
 #include <iostream>
 
+#include <imgui/imgui.h>
+
+double powi(double base, int pow) {
+    double out = base;
+    for(int i = 1; i < pow; ++i) {
+        out *= base;
+    }
+    return out;
+}
+
 void MinimaxController::do_turn(Board& board, const GameTime& time) {
     if(board.is_lost()) {
         return;
     }
     MinimaxStats stats;
-    auto [maybe_move, score] = minimax(board, 4, true, stats);
-
-    std::cout << "Nodes evaluated: " << stats.nodes_evaluated << std::endl;
-    std::cout << "\tMax Score: " << stats.max_score << std::endl;
-    std::cout << "\tDir: " << static_cast<ShiftDirection>(maybe_move)
-              << std::endl;
+    auto [maybe_move, score] = minimax(board, 6, stats);
+    if(score < 0.00000001) {
+        std::tie(maybe_move, score) = minimax(board, 4, stats);
+    }
+    if(score < 0.00000001) {
+        std::tie(maybe_move, score) = minimax(board, 2, stats);
+    }
+    if(score < 0.00000001) {
+        std::tie(maybe_move, score) = minimax(board, 0, stats);
+    }
 
     board.do_move(static_cast<ShiftDirection>(maybe_move));
+    m_stats = stats;
 }
 
 std::tuple<MaybeMove, double> MinimaxController::minimax(
-        Board& board, int depth, bool is_maximizing, MinimaxStats& stats) {
+        Board& board, int depth, MinimaxStats& stats) {
     return minimax_max(board, depth, stats);
 }
 
 double MinimaxController::score_board(const Board& board) {
-    return board.compute_score() *
-            (static_cast<double>(board.free_spaces()) / board.total_blocks());
+    auto score = board.compute_score() * powi(0.95, board.filled_spaces());
+    if(board.free_spaces() == 1) {
+        score *= 0.25;
+    } /* else if(board.free_spaces() == 2) {
+         score *= 0.33;
+     }
+     if(board.get_cell(0, board.height()-1).value == board.max_value()) {
+         score *= 2.0;
+     }
+     if(board.get_cell(0, board.height()-2).value == board.max_value()) {
+         score *= 1.5;
+     }
+     if(board.get_cell(1, board.height()-1).value == board.max_value()) {
+         score *= 1.5;
+     }
+     */
+
+    return score;
 }
 
 std::tuple<MaybeMove, double> MinimaxController::minimax_max(
@@ -46,6 +77,7 @@ std::tuple<MaybeMove, double> MinimaxController::minimax_max(
         } else {
             score = score_board(board_copy);
         }
+        score *= score_move(dir);
 
         if(score > max_score) {
             max_score = score;
@@ -87,4 +119,20 @@ double MinimaxController::minimax_min(
         }
     }
     return max_score;
+}
+
+void MinimaxController::draw_state(const Board& board, const GameTime& time) {
+    ImGui::Begin("Controller State");
+    ImGui::BulletText("Nodes Evaluated: %d", m_stats.nodes_evaluated);
+    ImGui::BulletText("Max Score: %f", m_stats.max_score);
+    ImGui::End();
+}
+
+double MinimaxController::score_move(ShiftDirection dir) {
+    /*if(dir == ShiftDirection::Up) {
+        return 0.25;
+    } else if(dir == ShiftDirection::Right) {
+        return 0.60;
+    }*/
+    return 1.00;
 }

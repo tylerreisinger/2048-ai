@@ -100,7 +100,7 @@ ImVec2 to_imvec2(sf::Vector2<T> in) {
 }
 
 Window::Window(uint64_t seed, int repeat)
-    : m_board(5, 5, seed), m_repeat(repeat) {}
+    : m_board(4, 4, seed), m_repeat(repeat) {}
 
 Window::~Window() {
     glDeleteTextures(1, &m_font_tex);
@@ -286,11 +286,17 @@ void Window::update_imgui(const GameTime& time) {
     ImGui::Begin("Board Statistics");
     ImGui::LabelText("##Header", "Current State:");
     ImGui::BulletText("Score: %d", static_cast<int>(m_board.compute_score()));
+    ImGui::BulletText(
+            "Highest Cell: %d", static_cast<int>(m_board.max_value()));
+    ImGui::BulletText(
+            "Total Value: %d", static_cast<int>(m_board.total_value()));
     ImGui::BulletText("Free Cells: %d", m_board.free_spaces());
     ImGui::BulletText("Turn #: %d", m_board.turn());
     ImGui::BulletText("Last Move Time: %fms", m_ai_time.count());
     ImGui::BulletText("Last Draw Time: %fms", m_draw_time.count());
     ImGui::End();
+
+    m_controller->draw_state(m_board, time);
 
     ImGui::Render();
 }

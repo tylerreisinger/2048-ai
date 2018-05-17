@@ -14,6 +14,8 @@ public:
 
     virtual void do_turn(Board& board, const GameTime& time) = 0;
     virtual void handle_event(Board& board, const sf::Event& e){};
+
+    virtual void draw_state(const Board& board, const GameTime& time){};
 };
 
 #endif
