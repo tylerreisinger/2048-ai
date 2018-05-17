@@ -64,6 +64,7 @@ public:
     int total_blocks() const { return width() * height(); }
     const std::vector<Cell>& cells() const { return m_cells; }
     void add_new_block();
+    int get_new_cell_val();
 
     bool is_filled() const;
     bool is_lost() const;

@@ -38,10 +38,12 @@ std::tuple<MaybeMove, double> MinimaxController::minimax(
 }
 
 double MinimaxController::score_board(const Board& board) {
-    auto score = board.compute_score() * powi(0.95, board.filled_spaces());
-    if(board.free_spaces() == 1) {
+    auto free = board.free_spaces();
+    auto score = board.compute_score();
+    score *= powi(1.05, free);
+    /*if(free == board.total_blocks()-1) {
         score *= 0.25;
-    } /* else if(board.free_spaces() == 2) {
+    }*/ /* else if(board.free_spaces() == 2) {
          score *= 0.33;
      }
      if(board.get_cell(0, board.height()-1).value == board.max_value()) {
@@ -98,7 +100,7 @@ double MinimaxController::minimax_min(
             continue;
         }
         Board board_copy = board;
-        board_copy.get_cell(i) = Cell(2);
+        board_copy.get_cell(i) = Cell(board.get_new_cell_val());
         stats.nodes_evaluated += 1;
 
         auto score = 0.0;
@@ -130,7 +132,7 @@ void MinimaxController::draw_state(const Board& board, const GameTime& time) {
 
 double MinimaxController::score_move(ShiftDirection dir) {
     /*if(dir == ShiftDirection::Up) {
-        return 0.25;
+        return 0.33;
     } else if(dir == ShiftDirection::Right) {
         return 0.60;
     }*/

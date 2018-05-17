@@ -80,11 +80,17 @@ bool Board::merge(Cell& cell1, Cell& cell2) {
     return false;
 }
 
-void Board::add_new_block() {
-    sf::Vector2<int> pos;
-    if(m_is_lost) {
-        return;
+int Board::get_new_cell_val() {
+    int two_or_four = m_rng() % 10;
+    if(two_or_four == 9) {
+        return 4;
+    } else {
+        return 2;
     }
+}
+
+
+void Board::add_new_block() {
     int free = free_spaces();
     if(free == 0) {
         m_is_lost = true;
@@ -92,11 +98,13 @@ void Board::add_new_block() {
     }
 
     int selector = m_rng() % free;
+    int val = get_new_cell_val();
+
     int free_cnt = 0;
     for(std::size_t i = 0; i < m_cells.size(); ++i) {
         if(m_cells[i].value == Cell::EMPTY) {
             if(free_cnt == selector) {
-                m_cells[i].value = 2;
+                m_cells[i].value = val;
                 return;
             }
             free_cnt += 1;
