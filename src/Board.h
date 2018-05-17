@@ -40,9 +40,9 @@ public:
     Board& operator=(const Board& other) = default;
     Board& operator=(Board&& other) noexcept = default;
 
-    void shift_board(ShiftDirection dir);
+    bool shift_board(ShiftDirection dir);
     void shift_board_legacy(ShiftDirection dir);
-    void do_move(ShiftDirection dir);
+    bool do_move(ShiftDirection dir);
 
     double compute_score() const;
     double total_value() const;
@@ -71,10 +71,10 @@ private:
 
     bool try_merge(Cell& lhs, Cell& rhs);
 
-    void shift_board_left();
-    void shift_board_right();
-    void shift_board_up();
-    void shift_board_down();
+    bool shift_board_left();
+    bool shift_board_right();
+    bool shift_board_up();
+    bool shift_board_down();
 
 
     int m_width;

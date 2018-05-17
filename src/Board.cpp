@@ -148,9 +148,17 @@ int Board::free_spaces() const {
 
 int Board::filled_spaces() const { return total_blocks() - free_spaces(); }
 
-void Board::do_move(ShiftDirection dir) {
-    shift_board(dir);
-    add_new_block();
+bool Board::do_move(ShiftDirection dir) {
+    if(m_is_lost) {
+        return true;
+    }
+    auto ret = shift_board(dir);
+    if(ret) {
+        add_new_block();
+    } else {
+        m_is_lost = is_filled();
+    }
+    return ret;
 }
 
 std::ostream& operator<<(std::ostream& stream, ShiftDirection dir) {
@@ -171,18 +179,26 @@ std::ostream& operator<<(std::ostream& stream, ShiftDirection dir) {
     return stream;
 }
 
-void Board::shift_board(ShiftDirection dir) {
-    m_turn += 1;
+bool Board::shift_board(ShiftDirection dir) {
+    bool is_modified = false;
     switch(dir) {
     case ShiftDirection::Left:
-        return shift_board_left();
+        is_modified = shift_board_left();
+        break;
     case ShiftDirection::Right:
-        return shift_board_right();
+        is_modified = shift_board_right();
+        break;
     case ShiftDirection::Up:
-        return shift_board_up();
+        is_modified = shift_board_up();
+        break;
     case ShiftDirection::Down:
-        return shift_board_down();
+        is_modified = shift_board_down();
+        break;
     }
+    if(is_modified) {
+        m_turn += 1;
+    }
+    return is_modified;
 }
 
 // These functions are written to be fast, as opposed to clean.
@@ -190,7 +206,8 @@ void Board::shift_board(ShiftDirection dir) {
 // execution time significantly, and for many search AIs, these
 // are the most time consuming functions in the program.
 
-void Board::shift_board_left() {
+bool Board::shift_board_left() {
+    bool is_modified = false;
     // Iterate the board until finding an empty space
     for(int y = 0; y < m_height; ++y) {
         auto y_idx = y * m_width;
@@ -202,6 +219,7 @@ void Board::shift_board_left() {
                 for(int x2 = x + 1; x2 < m_width; ++x2) {
                     auto& cell2 = m_cells[x2 + y_idx];
                     if(cell2.value != Cell::EMPTY) {
+                        is_modified = true;
                         // We found a non-empty space.
                         // Swap the empty space and non-empty space.
                         std::swap(*cell, cell2);
@@ -225,15 +243,18 @@ void Board::shift_board_left() {
                     auto& back_cell = m_cells[x - 1 + y_idx];
                     auto& front_cell = m_cells[x + y_idx];
                     if(try_merge(back_cell, front_cell)) {
+                        is_modified = true;
                         x -= 1;
                     }
                 }
             }
         }
     }
+    return is_modified;
 }
 
-void Board::shift_board_right() {
+bool Board::shift_board_right() {
+    bool is_modified = false;
     // Iterate the board until finding an empty space
     for(int y = 0; y < m_height; ++y) {
         auto y_idx = y * m_width;
@@ -245,6 +266,7 @@ void Board::shift_board_right() {
                 for(int x2 = x - 1; x2 >= 0; --x2) {
                     auto& cell2 = m_cells[x2 + y_idx];
                     if(cell2.value != Cell::EMPTY) {
+                        is_modified = true;
                         // We found a non-empty space.
                         // Swap the empty space and non-empty space.
                         std::swap(*cell, cell2);
@@ -268,15 +290,18 @@ void Board::shift_board_right() {
                     auto& back_cell = m_cells[x + 1 + y_idx];
                     auto& front_cell = m_cells[x + y_idx];
                     if(try_merge(back_cell, front_cell)) {
+                        is_modified = true;
                         x += 1;
                     }
                 }
             }
         }
     }
+    return is_modified;
 }
 
-void Board::shift_board_up() {
+bool Board::shift_board_up() {
+    bool is_modified = false;
     // Iterate the board until finding an empty space
     for(int x = 0; x < m_width; ++x) {
         for(int y = 0; y < m_height; ++y) {
@@ -287,6 +312,7 @@ void Board::shift_board_up() {
                 for(int y2 = y + 1; y2 < m_height; ++y2) {
                     auto& cell2 = m_cells[x + y2 * m_width];
                     if(cell2.value != Cell::EMPTY) {
+                        is_modified = true;
                         // We found a non-empty space.
                         // Swap the empty space and non-empty space.
                         std::swap(*cell, cell2);
@@ -310,15 +336,18 @@ void Board::shift_board_up() {
                     auto& back_cell = m_cells[x + (y - 1) * m_width];
                     auto& front_cell = m_cells[x + y * m_width];
                     if(try_merge(back_cell, front_cell)) {
+                        is_modified = true;
                         y -= 1;
                     }
                 }
             }
         }
     }
+    return is_modified;
 }
 
-void Board::shift_board_down() {
+bool Board::shift_board_down() {
+    bool is_modified = false;
     // Iterate the board until finding an empty space
     for(int x = 0; x < m_width; ++x) {
         for(int y = m_height - 1; y >= 0; --y) {
@@ -329,6 +358,7 @@ void Board::shift_board_down() {
                 for(int y2 = y - 1; y2 >= 0; --y2) {
                     auto& cell2 = m_cells[x + y2 * m_width];
                     if(cell2.value != Cell::EMPTY) {
+                        is_modified = true;
                         // We found a non-empty space.
                         // Swap the empty space and non-empty space.
                         std::swap(*cell, cell2);
@@ -352,12 +382,14 @@ void Board::shift_board_down() {
                     auto& back_cell = m_cells[x + (y + 1) * m_width];
                     auto& front_cell = m_cells[x + y * m_width];
                     if(try_merge(back_cell, front_cell)) {
+                        is_modified = true;
                         y += 1;
                     }
                 }
             }
         }
     }
+    return is_modified;
 }
 
 bool Board::try_merge(Cell& lhs, Cell& rhs) {

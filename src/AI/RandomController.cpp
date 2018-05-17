@@ -27,6 +27,7 @@ void RandomController::do_turn(Board& board, const GameTime& time) {
         std::terminate();
     }
 
-    board.shift_board(shift);
-    board.add_new_block();
+    if(!board.do_move(shift)) {
+        board.do_move(ShiftDirection::Right);
+    }
 }
