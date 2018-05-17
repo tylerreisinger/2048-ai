@@ -21,7 +21,7 @@ class ImDrawData;
 
 class Window {
 public:
-    Window();
+    Window(uint64_t seed = 0);
     ~Window();
 
     Window(const Window& other) = delete;

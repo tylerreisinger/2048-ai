@@ -9,8 +9,11 @@ std::ostream& operator<<(std::ostream& stream, sf::Vector2<int> v) {
     return stream;
 }
 
-Board::Board(int width, int height) : m_width(width), m_height(height) {
+Board::Board(int width, int height, uint64_t seed)
+    : m_width(width), m_height(height) {
     m_cells.resize(width * height);
+    std::seed_seq s = {seed >> 32, seed & 0xFFFFFFFF};
+    m_rng.seed(s);
 }
 // Mpstly works, but is over 1 OOM slower than the new methods.
 void Board::shift_board_legacy(ShiftDirection dir) {

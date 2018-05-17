@@ -32,7 +32,7 @@ public:
 
 class Board {
 public:
-    Board(int width, int height);
+    Board(int width, int height, uint64_t seed = 0);
     ~Board() = default;
 
     Board(const Board& other) = default;

@@ -99,7 +99,7 @@ ImVec2 to_imvec2(sf::Vector2<T> in) {
     return ImVec2(static_cast<float>(in.x), static_cast<float>(in.y));
 }
 
-Window::Window() : m_board(5, 5) {}
+Window::Window(uint64_t seed) : m_board(5, 5, seed) {}
 
 Window::~Window() {
     glDeleteTextures(1, &m_font_tex);

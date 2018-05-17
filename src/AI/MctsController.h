@@ -15,7 +15,7 @@ struct MctsOutput {
 class MctsController : public AiController {
 public:
     MctsController() = default;
-    MctsController(int delay) : AiController(delay) {}
+    MctsController(int delay, uint64_t seed = 0) : AiController(delay, seed) {}
     virtual ~MctsController() = default;
 
     MctsController(const MctsController& other) = delete;
@@ -24,6 +24,7 @@ public:
     MctsController& operator=(MctsController&& other) noexcept = default;
 
     virtual void do_turn(Board& board) override;
+    virtual void seed(std::seed_seq& seed) override { m_rng.seed(seed); }
 
 private:
     bool do_trial(Board& board, ShiftDirection dir);
