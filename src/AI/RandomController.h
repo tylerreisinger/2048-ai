@@ -8,8 +8,7 @@
 class RandomController : public AiController {
 public:
     RandomController() = default;
-    RandomController(int delay_interval, uint64_t seed)
-        : AiController(delay_interval, seed) {}
+    RandomController(uint64_t seed) : AiController(seed) {}
     virtual ~RandomController() = default;
 
     RandomController(const RandomController& other) = delete;
@@ -17,12 +16,11 @@ public:
     RandomController& operator=(const RandomController& other) = delete;
     RandomController& operator=(RandomController&& other) noexcept = default;
 
-    virtual void do_turn(Board& board) override;
+    virtual void do_turn(Board& board, const GameTime& time) override;
     virtual void seed(std::seed_seq& seed) override { m_rng.seed(seed); }
 
 private:
     std::mt19937 m_rng;
-    int m_turn = 0;
 };
 
 #endif

@@ -131,17 +131,20 @@ void Window::initialize(std::unique_ptr<IGameController> controller) {
 
 void Window::run(std::unique_ptr<IGameController> controller) {
     initialize(std::move(controller));
+    m_clock.tick(std::chrono::duration<double>(0.0));
 
     while(m_window.isOpen()) {
+        auto game_time = m_clock.tick(
+                std::chrono::duration<double, std::milli>(1.0 / 60.0));
         event_loop();
-        update();
-        draw();
+        update(game_time);
+        draw(game_time);
 
         m_window.display();
     }
 }
 
-void Window::draw() {
+void Window::draw(const GameTime& time) {
     auto start = std::chrono::high_resolution_clock::now();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw_imgui(ImGui::GetDrawData());
@@ -149,13 +152,17 @@ void Window::draw() {
     m_draw_time = std::chrono::duration_cast<
             std::chrono::duration<double, std::milli>>(end - start);
 }
-void Window::update() {
-    auto start = std::chrono::high_resolution_clock::now();
-    m_controller->do_turn(m_board);
-    auto end = std::chrono::high_resolution_clock::now();
-    m_ai_time = std::chrono::duration_cast<
-            std::chrono::duration<double, std::milli>>(end - start);
-    update_imgui();
+void Window::update(const GameTime& time) {
+    m_delay_elapsed += time.get_elapsed_wall_time();
+    if(m_delay_elapsed > m_delay) {
+        auto start = std::chrono::high_resolution_clock::now();
+        m_controller->do_turn(m_board, time);
+        m_delay_elapsed = std::chrono::duration<double>(0.0);
+        auto end = std::chrono::high_resolution_clock::now();
+        m_ai_time = std::chrono::duration_cast<
+                std::chrono::duration<double, std::milli>>(end - start);
+    }
+    update_imgui(time);
 }
 
 Result<unit_t, InitErrorKind> Window::init_gl() {
@@ -250,7 +257,7 @@ void Window::init_imgui() {
     io.Fonts->SetTexID(reinterpret_cast<void*>(m_font_tex));
 }
 
-void Window::update_imgui() {
+void Window::update_imgui(const GameTime& time) {
     auto& io = ImGui::GetIO();
     auto win_size = to_imvec2(m_window.getSize());
     io.DisplaySize = win_size;
@@ -261,6 +268,8 @@ void Window::update_imgui() {
     io.MouseDown[2] = sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle);
     io.MouseDown[3] = sf::Mouse::isButtonPressed(sf::Mouse::Button::XButton1);
     io.MouseDown[4] = sf::Mouse::isButtonPressed(sf::Mouse::Button::XButton2);
+
+    io.DeltaTime = time.get_elapsed_wall_time().count();
 
     ImGui::NewFrame();
 

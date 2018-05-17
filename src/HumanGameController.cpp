@@ -4,7 +4,7 @@
 
 #include <SFML/Window.hpp>
 
-void HumanGameController::do_turn(Board& board) {}
+void HumanGameController::do_turn(Board&, const GameTime&) {}
 
 void HumanGameController::handle_event(Board& board, const sf::Event& e) {
     if(board.is_lost()) {

@@ -9,8 +9,7 @@
 
 class TestController : public AiController {
 public:
-    TestController(int delay = 1, uint64_t seed = 0)
-        : AiController(delay, seed) {}
+    TestController(uint64_t seed = 0) : AiController(seed) {}
     virtual ~TestController() = default;
 
     TestController(const TestController& other) = delete;
@@ -18,7 +17,7 @@ public:
     TestController& operator=(const TestController& other) = delete;
     TestController& operator=(TestController&& other) noexcept = default;
 
-    virtual void do_turn(Board& board) override;
+    virtual void do_turn(Board& board, const GameTime& time) override;
     virtual void seed(std::seed_seq& seed) override { m_rng.seed(seed); }
 
 private:
@@ -26,7 +25,6 @@ private:
 
 
     std::mt19937 m_rng;
-    int m_turn = 0;
 };
 
 #endif

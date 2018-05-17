@@ -2,15 +2,9 @@
 
 #include <iostream>
 
-void MctsController::do_turn(Board& board) {
+void MctsController::do_turn(Board& board, const GameTime& time) {
     if(board.is_lost()) {
         return;
-    }
-    m_time += 1;
-    if(m_time < delay_interval()) {
-        return;
-    } else {
-        m_time = 0;
     }
     double max_score = 0.0;
     double max_avg_score = 0.0;

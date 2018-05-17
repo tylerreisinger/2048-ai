@@ -14,7 +14,7 @@
 
 cxxopts::ParseResult parse_opts(int argc, char** argv);
 std::unique_ptr<IGameController> create_controller(
-        const std::string& name, int delay = 10, uint64_t seed = 0);
+        const std::string& name, uint64_t seed = 0);
 
 int main(int argc, char** argv) {
     cxxopts::Options options(
@@ -23,9 +23,9 @@ int main(int argc, char** argv) {
             "The AI controller to use",
             cxxopts::value<std::string>()->default_value("HumanController"))(
             "d,delay",
-            "The delay time between AI moves",
-            cxxopts::value<int>()->default_value("1"))("h,help", "Print help")(
-            "s,seed",
+            "The delay time between AI moves, in milliseconds",
+            cxxopts::value<double>()->default_value("0.0"))(
+            "h,help", "Print help")("s,seed",
             "The initial seed to use for random number generators",
             cxxopts::value<uint64_t>());
 
@@ -51,8 +51,7 @@ int main(int argc, char** argv) {
 
     auto controller_name = args["controller"].as<std::string>();
     std::cout << "Selecting " << controller_name << "..." << std::endl;
-    auto controller = create_controller(
-            controller_name, args["delay"].as<int>(), seed_val);
+    auto controller = create_controller(controller_name, seed_val);
     if(!controller) {
         std::cerr << "Unknown controller '" << controller_name << "'."
                   << std::endl;
@@ -60,6 +59,8 @@ int main(int argc, char** argv) {
     }
 
     Window w(seed_val + 1);
+    w.set_delay(std::chrono::duration<double, std::milli>(
+            args["delay"].as<double>()));
     w.run(std::move(controller));
 
     return 0;
@@ -75,15 +76,15 @@ cxxopts::ParseResult parse_opts(int argc, char** argv) {
 }
 
 std::unique_ptr<IGameController> create_controller(
-        const std::string& name, int delay, uint64_t seed) {
+        const std::string& name, uint64_t seed) {
     if(name == "HumanController") {
         return std::make_unique<HumanGameController>();
     } else if(name == "RandomController") {
-        return std::make_unique<RandomController>(delay, seed);
+        return std::make_unique<RandomController>(seed);
     } else if(name == "MctsController") {
-        return std::make_unique<MctsController>(delay, seed);
+        return std::make_unique<MctsController>(seed);
     } else if(name == "TestController") {
-        return std::make_unique<TestController>(delay, seed);
+        return std::make_unique<TestController>(seed);
     } else {
         return nullptr;
     }

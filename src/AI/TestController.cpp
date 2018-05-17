@@ -1,16 +1,9 @@
 #include "TestController.h"
 
-void TestController::do_turn(Board& board) {
+void TestController::do_turn(Board& board, const GameTime& time) {
     if(board.is_lost()) {
         return;
     }
-    m_turn += 1;
-    if(m_turn < delay_interval()) {
-        return;
-    } else {
-        m_turn = 0;
-    }
-
     double max_score = 0.0;
     ShiftDirection max_dir = ShiftDirection::Left;
     for(int i = 0; i < 4; ++i) {

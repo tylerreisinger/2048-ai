@@ -2,15 +2,9 @@
 
 #include "Board.h"
 
-void RandomController::do_turn(Board& board) {
+void RandomController::do_turn(Board& board, const GameTime& time) {
     if(board.is_lost()) {
         return;
-    }
-    m_turn += 1;
-    if(m_turn < delay_interval()) {
-        return;
-    } else {
-        m_turn = 0;
     }
     std::uniform_int_distribution<int> dist(0, 3);
     auto choice = dist(m_rng);

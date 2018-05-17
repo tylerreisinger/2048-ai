@@ -15,7 +15,7 @@ struct MctsOutput {
 class MctsController : public AiController {
 public:
     MctsController() = default;
-    MctsController(int delay, uint64_t seed = 0) : AiController(delay, seed) {}
+    MctsController(uint64_t seed = 0) : AiController(seed) {}
     virtual ~MctsController() = default;
 
     MctsController(const MctsController& other) = delete;
@@ -23,7 +23,7 @@ public:
     MctsController& operator=(const MctsController& other) = delete;
     MctsController& operator=(MctsController&& other) noexcept = default;
 
-    virtual void do_turn(Board& board) override;
+    virtual void do_turn(Board& board, const GameTime& time) override;
     virtual void seed(std::seed_seq& seed) override { m_rng.seed(seed); }
 
 private:
@@ -38,7 +38,6 @@ private:
     std::minstd_rand m_rng;
     std::uniform_int_distribution<int> m_move_dist =
             std::uniform_int_distribution<int>(0, 3);
-    int m_time = 0;
 };
 
 #endif

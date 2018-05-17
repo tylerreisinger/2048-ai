@@ -17,7 +17,7 @@ public:
     HumanGameController& operator=(
             HumanGameController&& other) noexcept = default;
 
-    virtual void do_turn(Board& board) override;
+    virtual void do_turn(Board& board, const GameTime& time) override;
     virtual void handle_event(Board& board, const sf::Event& e) override;
 
 private:
