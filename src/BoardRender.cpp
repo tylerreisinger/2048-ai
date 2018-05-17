@@ -60,36 +60,32 @@ uint32_t BoardRenderer::color_for_cell(const Cell& cell) const {
     case 2:
         return 0xFFE40042;
     case 3:
-        return 0xFFE80010;
-    case 4:
         return 0xFFED2300;
-    case 5:
+    case 4:
         return 0xFFF15900;
-    case 6:
+    case 5:
         return 0xFFF9CC00;
-    case 7:
+    case 6:
         return 0xFFE9FA07;
-    case 8:
+    case 7:
         return 0xFFAFFB0F;
-    case 9:
-        return 0xFF78FB16;
-    case 10:
+    case 8:
         return 0xFF44FC1E;
-    case 11:
+    case 9:
         return 0xFF57FF7A;
-    case 12:
+    case 10:
         return 0xFF46FF95;
-    case 13:
+    case 11:
         return 0xFF36FFB7;
-    case 14:
+    case 12:
         return 0xFF25FFE1;
-    case 15:
+    case 13:
         return 0xFF15EBFF;
-    case 16:
+    case 14:
         return 0xFF05B3FF;
-    case 17:
+    case 15:
         return 0xFFBCC2FF;
-    case 18:
+    case 16:
         return 0xFFD4C2FE;
     default:
         return 0xFFECC6FE;
