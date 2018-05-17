@@ -22,7 +22,7 @@ class ImDrawData;
 
 class Window {
 public:
-    Window(uint64_t seed = 0);
+    Window(uint64_t seed = 0, int repeat = 1);
     ~Window();
 
     Window(const Window& other) = delete;
@@ -47,6 +47,7 @@ private:
 
     sf::RenderWindow m_window;
 
+    int m_repeat = 1;
     GLuint m_font_tex = 0;
     GLuint m_imgui_shader = 0;
 

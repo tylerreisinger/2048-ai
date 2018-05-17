@@ -99,7 +99,8 @@ ImVec2 to_imvec2(sf::Vector2<T> in) {
     return ImVec2(static_cast<float>(in.x), static_cast<float>(in.y));
 }
 
-Window::Window(uint64_t seed) : m_board(5, 5, seed) {}
+Window::Window(uint64_t seed, int repeat)
+    : m_board(5, 5, seed), m_repeat(repeat) {}
 
 Window::~Window() {
     glDeleteTextures(1, &m_font_tex);
@@ -155,12 +156,14 @@ void Window::draw(const GameTime& time) {
 void Window::update(const GameTime& time) {
     m_delay_elapsed += time.get_elapsed_wall_time();
     if(m_delay_elapsed > m_delay) {
-        auto start = std::chrono::high_resolution_clock::now();
-        m_controller->do_turn(m_board, time);
-        m_delay_elapsed = std::chrono::duration<double>(0.0);
-        auto end = std::chrono::high_resolution_clock::now();
-        m_ai_time = std::chrono::duration_cast<
-                std::chrono::duration<double, std::milli>>(end - start);
+        for(int i = 0; i < m_repeat; ++i) {
+            auto start = std::chrono::high_resolution_clock::now();
+            m_controller->do_turn(m_board, time);
+            m_delay_elapsed = std::chrono::duration<double>(0.0);
+            auto end = std::chrono::high_resolution_clock::now();
+            m_ai_time = std::chrono::duration_cast<
+                    std::chrono::duration<double, std::milli>>(end - start);
+        }
     }
     update_imgui(time);
 }

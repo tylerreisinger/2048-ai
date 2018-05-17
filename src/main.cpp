@@ -7,6 +7,7 @@
 #include "cxxopts.hpp"
 
 #include "AI/MctsController.h"
+#include "AI/MinimaxController.h"
 #include "AI/RandomController.h"
 #include "AI/TestController.h"
 #include "HumanGameController.h"
@@ -27,7 +28,9 @@ int main(int argc, char** argv) {
             cxxopts::value<double>()->default_value("0.0"))(
             "h,help", "Print help")("s,seed",
             "The initial seed to use for random number generators",
-            cxxopts::value<uint64_t>());
+            cxxopts::value<uint64_t>())("r,repeat",
+            "How many turns to make per frame",
+            cxxopts::value<int>()->default_value("1"));
 
     auto args = options.parse(argc, argv);
 
@@ -37,6 +40,7 @@ int main(int argc, char** argv) {
                   << "\tHumanController\n"
                   << "\tRandomController\n"
                   << "\tMctsController\n"
+                  << "\tMinimaxController\n"
                   << "\tTestController\n";
         return 0;
     }
@@ -58,7 +62,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    Window w(seed_val + 1);
+    Window w(seed_val + 1, args["repeat"].as<int>());
     w.set_delay(std::chrono::duration<double, std::milli>(
             args["delay"].as<double>()));
     w.run(std::move(controller));
@@ -83,6 +87,8 @@ std::unique_ptr<IGameController> create_controller(
         return std::make_unique<RandomController>(seed);
     } else if(name == "MctsController") {
         return std::make_unique<MctsController>(seed);
+    } else if(name == "MinimaxController") {
+        return std::make_unique<MinimaxController>(seed);
     } else if(name == "TestController") {
         return std::make_unique<TestController>(seed);
     } else {

@@ -27,6 +27,8 @@ public:
     Cell& operator=(const Cell& other) = default;
     Cell& operator=(Cell&& other) noexcept = default;
 
+    bool is_empty() const { return value == EMPTY; }
+
     uint64_t value = EMPTY;
 };
 
@@ -54,6 +56,8 @@ public:
 
     const Cell& get_cell(int x, int y) const;
     Cell& get_cell(int x, int y);
+    const Cell& get_cell(int idx) const { return m_cells[idx]; }
+    Cell& get_cell(int idx) { return m_cells[idx]; }
 
     int width() const { return m_width; }
     int height() const { return m_height; }
