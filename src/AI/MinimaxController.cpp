@@ -41,9 +41,9 @@ double MinimaxController::score_board(const Board& board) {
     auto free = board.free_spaces();
     auto score = board.compute_score();
     score *= powi(1.05, free);
-    /*if(free == board.total_blocks()-1) {
+    if(free == 0) {
         score *= 0.25;
-    }*/ /* else if(board.free_spaces() == 2) {
+    } /* else if(board.free_spaces() == 2) {
          score *= 0.33;
      }
      if(board.get_cell(0, board.height()-1).value == board.max_value()) {
@@ -94,30 +94,34 @@ double MinimaxController::minimax_min(
         Board& board, int depth, MinimaxStats& stats) {
     double max_score = std::numeric_limits<double>::min();
     int max_idx = 0;
-    for(int i = 0; i < board.total_blocks(); ++i) {
-        auto cell = board.get_cell(i);
-        if(!cell.is_empty()) {
-            continue;
-        }
-        Board board_copy = board;
-        board_copy.get_cell(i) = Cell(board.get_new_cell_val());
-        stats.nodes_evaluated += 1;
 
-        auto score = 0.0;
-        if(board_copy.is_filled()) {
-            score = std::numeric_limits<double>::min();
-            continue;
-        }
-        if(depth > 0) {
-            auto [move, out_score] = minimax_max(board_copy, depth - 1, stats);
-            score = out_score;
-        } else {
-            score = score_board(board_copy);
-        }
+    for(int j = 0; j < 2; ++j) {
+        for(int i = 0; i < board.total_blocks(); ++i) {
+            auto cell = board.get_cell(i);
+            if(!cell.is_empty()) {
+                continue;
+            }
+            Board board_copy = board;
+            board_copy.get_cell(i) = Cell(2 << j);
+            stats.nodes_evaluated += 1;
 
-        if(score > max_score) {
-            max_score = score;
-            max_idx = i;
+            auto score = 0.0;
+            if(board_copy.is_lost()) {
+                score = std::numeric_limits<double>::min();
+                continue;
+            }
+            if(depth > 0) {
+                auto [move, out_score] =
+                        minimax_max(board_copy, depth - 1, stats);
+                score = out_score;
+            } else {
+                score = score_board(board_copy);
+            }
+
+            if(score > max_score) {
+                max_score = score;
+                max_idx = i;
+            }
         }
     }
     return max_score;
