@@ -19,7 +19,7 @@ enum class ShiftDirection {
 
 class Cell {
 public:
-    static constexpr uint64_t EMPTY = 0;
+    static constexpr uint32_t EMPTY = 0;
     Cell() = default;
     Cell(uint64_t value) : value(value) {}
     ~Cell() = default;
@@ -31,7 +31,7 @@ public:
 
     bool is_empty() const { return value == EMPTY; }
 
-    uint64_t value = EMPTY;
+    uint32_t value = EMPTY;
 };
 
 class Board {
@@ -98,6 +98,7 @@ private:
     bool m_is_lost = false;
 };
 
+inline uint32_t fast_pow2_log2(uint32_t v) { return __builtin_ctz(v); }
 inline uint64_t fast_pow2_log2(uint64_t v) {
     /*
     switch(v) {

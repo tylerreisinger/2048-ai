@@ -13,6 +13,11 @@ Board::Board(int width, int height, uint64_t seed)
     // m_cells.resize(width * height);
     std::seed_seq s = {seed >> 32, seed & 0xFFFFFFFF};
     m_rng.seed(s);
+
+    for(int i = 0; i < 20; ++i) {
+        std::cout << (2 << i) << " " << score_for_cell(Cell(2 << i))
+                  << std::endl;
+    }
 }
 // Mpstly works, but is over 1 OOM slower than the new methods.
 void Board::shift_board_legacy(ShiftDirection dir) {
