@@ -45,6 +45,7 @@ private:
     std::tuple<MaybeMove, double> minimax(Board& board,
             int depth,
             MinimaxStats& node_count);
+
     std::tuple<MaybeMove, double> minimax_max(
             Board& board, int depth, MinimaxStats& node_count);
     double minimax_min(Board& board, int depth, MinimaxStats& node_count);

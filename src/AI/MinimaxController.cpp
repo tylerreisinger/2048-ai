@@ -43,19 +43,7 @@ double MinimaxController::score_board(const Board& board) {
     score *= powi(1.05, free);
     if(free == 0) {
         score *= 0.25;
-    } /* else if(board.free_spaces() == 2) {
-         score *= 0.33;
-     }
-     if(board.get_cell(0, board.height()-1).value == board.max_value()) {
-         score *= 2.0;
-     }
-     if(board.get_cell(0, board.height()-2).value == board.max_value()) {
-         score *= 1.5;
-     }
-     if(board.get_cell(1, board.height()-1).value == board.max_value()) {
-         score *= 1.5;
-     }
-     */
+    }
 
     return score;
 }
@@ -106,10 +94,6 @@ double MinimaxController::minimax_min(
             stats.nodes_evaluated += 1;
 
             auto score = 0.0;
-            if(board_copy.is_lost()) {
-                score = std::numeric_limits<double>::min();
-                continue;
-            }
             if(depth > 0) {
                 auto [move, out_score] =
                         minimax_max(board_copy, depth - 1, stats);
