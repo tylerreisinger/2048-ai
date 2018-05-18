@@ -49,9 +49,11 @@ private:
     std::tuple<MaybeMove, double> minimax_max(
             Board& board, int depth, MinimaxStats& node_count);
     double minimax_min(Board& board, int depth, MinimaxStats& node_count);
+
     double score_board(const Board& board);
     double score_move(ShiftDirection dir);
 
+    std::chrono::duration<double> m_time_per_node;
     std::default_random_engine m_rng;
     MinimaxStats m_stats;
 };

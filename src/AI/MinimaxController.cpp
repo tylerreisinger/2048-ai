@@ -4,6 +4,18 @@
 
 #include <imgui/imgui.h>
 
+std::string format_duration(std::chrono::duration<double> dt) {
+    if(dt.count() < 1e-6) {
+        return std::to_string(dt.count() * 1e9) + " ns";
+    } else if(dt.count() < 1e-3) {
+        return std::to_string(dt.count() * 1e6) + " us";
+    } else if(dt.count() < 1.0) {
+        return std::to_string(dt.count() * 1e3) + " ms";
+    } else {
+        return std::to_string(dt.count()) + " s";
+    }
+}
+
 double powi(double base, int pow) {
     double out = base;
     for(int i = 1; i < pow; ++i) {
@@ -13,6 +25,7 @@ double powi(double base, int pow) {
 }
 
 void MinimaxController::do_turn(Board& board, const GameTime& time) {
+    auto start = std::chrono::high_resolution_clock::now();
     if(board.is_lost()) {
         return;
     }
@@ -30,6 +43,9 @@ void MinimaxController::do_turn(Board& board, const GameTime& time) {
 
     board.do_move(static_cast<ShiftDirection>(maybe_move));
     m_stats = stats;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    m_time_per_node = (end - start) / stats.nodes_evaluated;
 }
 
 std::tuple<MaybeMove, double> MinimaxController::minimax(
@@ -115,6 +131,9 @@ void MinimaxController::draw_state(const Board& board, const GameTime& time) {
     ImGui::Begin("Controller State");
     ImGui::BulletText("Nodes Evaluated: %d", m_stats.nodes_evaluated);
     ImGui::BulletText("Max Score: %f", m_stats.max_score);
+    auto time_str = format_duration(m_time_per_node);
+    ImGui::BulletText("Time per Node: %s", time_str.c_str());
+    ImGui::BulletText("Nodes per Sec: %d", static_cast<int>(1.0 / m_time_per_node.count()));
     ImGui::End();
 }
 
