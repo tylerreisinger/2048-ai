@@ -1,6 +1,5 @@
 #include "Board.h"
 
-#include <algorithm>
 #include <cmath>
 #include <iostream>
 
@@ -11,7 +10,7 @@ std::ostream& operator<<(std::ostream& stream, sf::Vector2<int> v) {
 
 Board::Board(int width, int height, uint64_t seed)
     : m_width(width), m_height(height) {
-    m_cells.resize(width * height);
+    // m_cells.resize(width * height);
     std::seed_seq s = {seed >> 32, seed & 0xFFFFFFFF};
     m_rng.seed(s);
 }
@@ -40,11 +39,6 @@ void Board::shift_board_legacy(ShiftDirection dir) {
         idx += 1;
     } while(changed == true);
 }
-
-const Cell& Board::get_cell(int x, int y) const {
-    return m_cells[x + y * m_width];
-}
-Cell& Board::get_cell(int x, int y) { return m_cells[x + y * m_width]; }
 
 sf::Vector2<int> Board::dir_offset(ShiftDirection dir) {
     switch(dir) {
@@ -104,49 +98,6 @@ void Board::add_new_block() {
         }
     }
 }
-
-bool Board::is_filled() const {
-    return std::all_of(m_cells.begin(), m_cells.end(), [](auto& cell) {
-        return cell.value != Cell::EMPTY;
-    });
-}
-bool Board::is_lost() const { return m_is_lost; }
-
-double Board::compute_score() const {
-    double val = 0.0;
-    for(std::size_t i = 0; i < m_cells.size(); ++i) {
-        val += score_for_cell(m_cells[i].value);
-    }
-    return val;
-}
-
-double Board::total_value() const {
-    double val = 0.0;
-    for(const auto& cell : m_cells) {
-        val += cell.value;
-    }
-    return val;
-}
-
-double Board::max_value() const {
-    double val = 0.0;
-    for(const auto& cell : m_cells) {
-        val = std::max(val, static_cast<double>(cell.value));
-    }
-    return val;
-}
-
-int Board::free_spaces() const {
-    int val = 0;
-    for(const auto& cell : m_cells) {
-        if(cell.value == Cell::EMPTY) {
-            val += 1;
-        }
-    }
-    return val;
-}
-
-int Board::filled_spaces() const { return total_blocks() - free_spaces(); }
 
 bool Board::do_move(ShiftDirection dir) {
     if(m_is_lost) {

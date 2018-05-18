@@ -1,6 +1,8 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <ostream>
 #include <random>
@@ -34,6 +36,7 @@ public:
 
 class Board {
 public:
+    using VecType = std::array<Cell, 16>;
     Board(int width, int height, uint64_t seed = 0);
     ~Board() = default;
 
@@ -41,6 +44,11 @@ public:
     Board(Board&& other) noexcept = default;
     Board& operator=(const Board& other) = default;
     Board& operator=(Board&& other) noexcept = default;
+
+    Board clone() const {
+        Board b = *this;
+        return b;
+    }
 
     bool shift_board(ShiftDirection dir);
     void shift_board_legacy(ShiftDirection dir);
@@ -62,7 +70,7 @@ public:
     int width() const { return m_width; }
     int height() const { return m_height; }
     int total_blocks() const { return width() * height(); }
-    const std::vector<Cell>& cells() const { return m_cells; }
+    const VecType& cells() const { return m_cells; }
     void add_new_block();
     int get_new_cell_val();
 
@@ -85,7 +93,7 @@ private:
     int m_width;
     int m_height;
     int m_turn = 0;
-    std::vector<Cell> m_cells;
+    VecType m_cells;
     std::minstd_rand m_rng;
     bool m_is_lost = false;
 };
@@ -109,7 +117,7 @@ inline uint64_t fast_pow2_log2(uint64_t v) {
         case 8192: return 13;
     }
     */
-    return 64 - __builtin_clzl(v) - 1;
+    return __builtin_ctzl(v);
 }
 
 inline double Board::score_for_cell(const Cell& cell) const {
@@ -118,7 +126,56 @@ inline double Board::score_for_cell(const Cell& cell) const {
     return 2.0 * x * n;
 }
 
+inline const Cell& Board::get_cell(int x, int y) const {
+    return m_cells[x + y * m_width];
+}
+inline Cell& Board::get_cell(int x, int y) { return m_cells[x + y * m_width]; }
+inline double Board::compute_score() const {
+    double val = 0.0;
+    for(std::size_t i = 0; i < m_cells.size(); ++i) {
+        val += score_for_cell(m_cells[i].value);
+    }
+    return val;
+}
+
+inline bool Board::is_filled() const {
+    return std::all_of(m_cells.begin(), m_cells.end(), [](auto& cell) {
+        return cell.value != Cell::EMPTY;
+    });
+}
+inline bool Board::is_lost() const { return m_is_lost; }
+
+inline double Board::total_value() const {
+    double val = 0.0;
+    for(const auto& cell : m_cells) {
+        val += cell.value;
+    }
+    return val;
+}
+
+inline double Board::max_value() const {
+    double val = 0.0;
+    for(const auto& cell : m_cells) {
+        val = std::max(val, static_cast<double>(cell.value));
+    }
+    return val;
+}
+
+inline int Board::free_spaces() const {
+    int val = 0;
+    for(const auto& cell : m_cells) {
+        if(cell.value == Cell::EMPTY) {
+            val += 1;
+        }
+    }
+    return val;
+}
+
+inline int Board::filled_spaces() const {
+    return total_blocks() - free_spaces();
+}
 
 std::ostream& operator<<(std::ostream& stream, ShiftDirection dir);
+
 
 #endif
