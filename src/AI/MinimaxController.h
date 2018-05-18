@@ -58,6 +58,9 @@ private:
             double beta,
             MinimaxStats& node_count);
 
+    std::tuple<MaybeMove, double> iterative_deepen(
+            Board& board, int start, int end, MinimaxStats& stats);
+
     double score_board(const Board& board);
     double score_move(ShiftDirection dir);
 

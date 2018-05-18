@@ -30,16 +30,7 @@ void MinimaxController::do_turn(Board& board, const GameTime& time) {
         return;
     }
     MinimaxStats stats;
-    auto [maybe_move, score] = minimax(board, 6, stats);
-    if(score < 0.00000001) {
-        std::tie(maybe_move, score) = minimax(board, 4, stats);
-    }
-    if(score < 0.00000001) {
-        std::tie(maybe_move, score) = minimax(board, 2, stats);
-    }
-    if(score < 0.00000001) {
-        std::tie(maybe_move, score) = minimax(board, 0, stats);
-    }
+    auto [maybe_move, score] = iterative_deepen(board, 0, 6, stats);
 
     board.do_move(static_cast<ShiftDirection>(maybe_move));
     m_stats = stats;
@@ -164,4 +155,20 @@ double MinimaxController::score_move(ShiftDirection dir) {
         return 0.60;
     }*/
     return 1.00;
+}
+
+std::tuple<MaybeMove, double> MinimaxController::iterative_deepen(
+        Board& board, int start, int end, MinimaxStats& stats) {
+    double max_score = 0.0;
+    MaybeMove dir = MaybeMove::Left;
+    for(int i = start; i <= end; i += 2) {
+        auto board_clone = board.clone();
+        auto [move, score] = minimax(board_clone, i, stats);
+        if(score > max_score) {
+            max_score = score;
+            dir = move;
+        }
+    }
+
+    return std::tuple(dir, max_score);
 }
