@@ -4,6 +4,23 @@
 
 #include <imgui/imgui.h>
 
+static constexpr double high_matrix[] = {0.20,
+        0.00,
+        0.00,
+        0.00,
+        0.40,
+        0.10,
+        0.00,
+        0.00,
+        0.65,
+        0.40,
+        0.10,
+        0.00,
+        1.00,
+        0.65,
+        0.40,
+        0.20};
+
 std::string format_duration(std::chrono::duration<double> dt) {
     if(dt.count() < 1e-6) {
         return std::to_string(dt.count() * 1e9) + " ns";
@@ -49,12 +66,45 @@ std::tuple<MaybeMove, double> MinimaxController::minimax(
 }
 
 double MinimaxController::score_board(const Board& board) {
-    auto free = board.free_spaces();
-    auto score = board.compute_score();
-    score *= powi(1.05, free);
-    if(free == 0) {
-        score *= 0.25;
+    if(board.is_lost()) {
+        return 0.0;
     }
+    auto free = board.free_spaces();
+    auto max_val = board.max_value();
+
+    auto score = 0.0;
+    auto board_score = board.compute_score();
+    // score += 0.55*board.monotonic_score();
+    score += board_score;
+
+    score *= powi(1.05, free);
+    // score *= 1.0 + 0.2*fast_pow2_log2(max_val);
+    /*
+    if(free == 0) {
+        score *= 0.10;
+    } else if(free == 1) {
+        score *= 0.50;
+    } else if(free == 2) {
+        score *= 0.66;
+    }
+    */
+
+    double high_edges_score = 0.0;
+    double low_edges_score = 1.0;
+    for(int i = 0; i < board.total_blocks(); ++i) {
+        auto& cell = board.get_cell(i);
+        if(cell.value == max_val) {
+            high_edges_score += high_matrix[i];
+        } else if(cell.value == (max_val >> 1)) {
+            high_edges_score += 0.5 * high_matrix[i];
+        }
+        int low_cutoff = fast_pow2_log2(max_val) - 3;
+        for(int i = 1; i < low_cutoff; ++i) {
+            low_edges_score += (low_cutoff - i) * high_matrix[i];
+        }
+    }
+
+    score *= 1.0 + 0.15 * high_edges_score;
 
     return score;
 }
@@ -130,7 +180,7 @@ double MinimaxController::minimax_min(Board& board,
 
             if(max_score < alpha) {
                 stats.nodes_pruned += 1;
-                break;
+                return max_score;
             }
         }
     }
@@ -141,6 +191,9 @@ void MinimaxController::draw_state(const Board& board, const GameTime& time) {
     ImGui::Begin("Controller State");
     ImGui::BulletText("Nodes Evaluated: %d", m_stats.nodes_evaluated);
     ImGui::BulletText("Nodes Pruned: %d", m_stats.nodes_pruned);
+    ImGui::BulletText("Prune Ratio: %f%%",
+            100.0 * static_cast<double>(m_stats.nodes_pruned) /
+                    (m_stats.nodes_pruned + m_stats.nodes_evaluated));
     ImGui::BulletText("Max Score: %f", m_stats.max_score);
     auto time_str = format_duration(m_time_per_node);
     ImGui::BulletText("Time per Node: %s", time_str.c_str());

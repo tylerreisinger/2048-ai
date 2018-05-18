@@ -356,3 +356,33 @@ bool Board::try_merge(Cell& lhs, Cell& rhs) {
     }
     return false;
 }
+
+double Board::monotonic_score() const {
+    double score = 0.0;
+    for(int y = 0; y < m_height; ++y) {
+        auto y_idx = y * m_width;
+        for(int x = 1; x < m_width; ++x) {
+            auto front = m_cells[x - 1 + y_idx];
+            auto back = m_cells[x + y_idx];
+
+            if(front.value == (back.value >> 1) ||
+                    back.value == (front.value >> 1)) {
+                score += front.value + back.value;
+            }
+        }
+    }
+    for(int y = 1; y < m_height; ++y) {
+        auto y_idx = y * m_width;
+        for(int x = 0; x < m_width; ++x) {
+            auto front = m_cells[x + y_idx - m_width];
+            auto back = m_cells[x + y_idx];
+
+            if(front.value == (back.value >> 1) ||
+                    back.value == (front.value >> 1)) {
+                score += front.value + back.value;
+            }
+        }
+    }
+
+    return score;
+}

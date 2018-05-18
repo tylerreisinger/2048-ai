@@ -56,7 +56,9 @@ public:
 
     double compute_score() const;
     double total_value() const;
-    double max_value() const;
+    uint32_t max_value() const;
+
+    double monotonic_score() const;
 
     int free_spaces() const;
     int filled_spaces() const;
@@ -154,10 +156,10 @@ inline double Board::total_value() const {
     return val;
 }
 
-inline double Board::max_value() const {
-    double val = 0.0;
+inline uint32_t Board::max_value() const {
+    uint32_t val = 0.0;
     for(const auto& cell : m_cells) {
-        val = std::max(val, static_cast<double>(cell.value));
+        val = std::max(val, cell.value);
     }
     return val;
 }
