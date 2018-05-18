@@ -50,7 +50,11 @@ void MinimaxController::do_turn(Board& board, const GameTime& time) {
 
 std::tuple<MaybeMove, double> MinimaxController::minimax(
         Board& board, int depth, MinimaxStats& stats) {
-    return minimax_max(board, depth, stats);
+    return minimax_max(board,
+            depth,
+            std::numeric_limits<double>::min(),
+            std::numeric_limits<double>::max(),
+            stats);
 }
 
 double MinimaxController::score_board(const Board& board) {
@@ -64,9 +68,12 @@ double MinimaxController::score_board(const Board& board) {
     return score;
 }
 
-std::tuple<MaybeMove, double> MinimaxController::minimax_max(
-        Board& board, int depth, MinimaxStats& stats) {
-    double max_score = std::numeric_limits<double>::min();
+std::tuple<MaybeMove, double> MinimaxController::minimax_max(Board& board,
+        int depth,
+        double alpha,
+        double beta,
+        MinimaxStats& stats) {
+    double max_score = alpha; // std::numeric_limits<double>::min();
     ShiftDirection max_dir = ShiftDirection::Left;
     for(int i = 0; i < 4; ++i) {
         auto dir = static_cast<ShiftDirection>(i);
@@ -79,7 +86,7 @@ std::tuple<MaybeMove, double> MinimaxController::minimax_max(
 
         double score;
         if(depth > 0) {
-            score = minimax_min(board_copy, depth - 1, stats);
+            score = minimax_min(board_copy, depth - 1, max_score, beta, stats);
         } else {
             score = score_board(board_copy);
         }
@@ -89,14 +96,21 @@ std::tuple<MaybeMove, double> MinimaxController::minimax_max(
             max_score = score;
             max_dir = dir;
         }
+        if(max_score > beta) {
+            stats.nodes_pruned += 1;
+            break;
+        }
     }
     stats.max_score = std::max(stats.max_score, max_score);
     return std::tuple(static_cast<MaybeMove>(max_dir), max_score);
 }
 
-double MinimaxController::minimax_min(
-        Board& board, int depth, MinimaxStats& stats) {
-    double max_score = std::numeric_limits<double>::min();
+double MinimaxController::minimax_min(Board& board,
+        int depth,
+        double alpha,
+        double beta,
+        MinimaxStats& stats) {
+    double max_score = beta; // std::numeric_limits<double>::min();
     int max_idx = 0;
 
     for(int j = 0; j < 2; ++j) {
@@ -111,16 +125,21 @@ double MinimaxController::minimax_min(
 
             auto score = 0.0;
             if(depth > 0) {
-                auto [move, out_score] =
-                        minimax_max(board_copy, depth - 1, stats);
+                auto [move, out_score] = minimax_max(
+                        board_copy, depth - 1, alpha, max_score, stats);
                 score = out_score;
             } else {
                 score = score_board(board_copy);
             }
 
-            if(score > max_score) {
+            if(score < max_score) {
                 max_score = score;
                 max_idx = i;
+            }
+
+            if(max_score < alpha) {
+                stats.nodes_pruned += 1;
+                break;
             }
         }
     }
@@ -130,6 +149,7 @@ double MinimaxController::minimax_min(
 void MinimaxController::draw_state(const Board& board, const GameTime& time) {
     ImGui::Begin("Controller State");
     ImGui::BulletText("Nodes Evaluated: %d", m_stats.nodes_evaluated);
+    ImGui::BulletText("Nodes Pruned: %d", m_stats.nodes_pruned);
     ImGui::BulletText("Max Score: %f", m_stats.max_score);
     auto time_str = format_duration(m_time_per_node);
     ImGui::BulletText("Time per Node: %s", time_str.c_str());

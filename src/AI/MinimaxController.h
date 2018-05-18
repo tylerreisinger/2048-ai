@@ -24,6 +24,7 @@ struct MinimaxResult {
 struct MinimaxStats {
     double max_score = std::numeric_limits<double>::min();
     int nodes_evaluated = 0;
+    int nodes_pruned = 0;
 };
 
 class MinimaxController : public AiController {
@@ -46,9 +47,16 @@ private:
             int depth,
             MinimaxStats& node_count);
 
-    std::tuple<MaybeMove, double> minimax_max(
-            Board& board, int depth, MinimaxStats& node_count);
-    double minimax_min(Board& board, int depth, MinimaxStats& node_count);
+    std::tuple<MaybeMove, double> minimax_max(Board& board,
+            int depth,
+            double alpha,
+            double beta,
+            MinimaxStats& node_count);
+    double minimax_min(Board& board,
+            int depth,
+            double alpha,
+            double beta,
+            MinimaxStats& node_count);
 
     double score_board(const Board& board);
     double score_move(ShiftDirection dir);
